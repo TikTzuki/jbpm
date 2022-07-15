@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/process-instance")
@@ -42,4 +44,11 @@ public class ProcessInstanceController {
         return "Signal sent to instance (" + id + ") successfully";
     }
 
+    @RequestMapping(value = "/new", method = RequestMethod.POST)
+    public Long newProcessInstance(
+            @RequestParam String deploymentId, @RequestParam String processId,
+            @RequestParam Map<String, String> allRequestParams
+    ) {
+        return processService.startProcess(deploymentId, processId, new HashMap<>(allRequestParams));
+    }
 }

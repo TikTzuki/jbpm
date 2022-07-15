@@ -17,4 +17,8 @@ public class BPMN {
     public BPMN(Blob content) {
         this.content = content;
     }
+
+    public BPMN() {
+
+    }
 }

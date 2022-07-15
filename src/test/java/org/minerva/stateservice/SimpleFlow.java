@@ -18,7 +18,7 @@ public class SimpleFlow extends TestCase {
         RuntimeEnvironment env = RuntimeEnvironmentBuilder.Factory.get()
                 .newDefaultInMemoryBuilder()
                 .addAsset(ResourceFactory.newClassPathResource("scriptTaskExample.bpmn"), ResourceType.BPMN2)
-//                .addEnvironmentEntry(EnvironmentName.ENTITY_MANAGER_FACTORY, emf)
+                .addEnvironmentEntry(EnvironmentName.ENTITY_MANAGER_FACTORY, emf)
                 .get();
 
         RuntimeManager manager = RuntimeManagerFactory.Factory.get().newSingletonRuntimeManager(env);

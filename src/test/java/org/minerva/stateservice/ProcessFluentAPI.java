@@ -5,7 +5,6 @@ import junit.framework.TestCase;
 import org.drools.core.SessionConfiguration;
 import org.drools.core.audit.WorkingMemoryInMemoryLogger;
 import org.drools.core.impl.EnvironmentFactory;
-import org.drools.core.impl.KnowledgeBaseFactory;
 import org.jbpm.bpmn2.xml.XmlBPMNProcessDumper;
 import org.jbpm.marshalling.impl.ProcessInstanceResolverStrategy;
 import org.jbpm.process.audit.AuditLogService;
@@ -21,23 +20,20 @@ import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.KieRepository;
 import org.kie.api.builder.Message.Level;
-import org.kie.api.fluent.Dialect;
 import org.kie.api.io.Resource;
 import org.kie.api.marshalling.ObjectMarshallingStrategy;
 import org.kie.api.runtime.Environment;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSessionConfiguration;
+import org.kie.internal.KnowledgeBaseFactory;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.internal.persistence.jpa.JPAKnowledgeService;
 import org.kie.internal.runtime.StatefulKnowledgeSession;
 import org.kie.internal.runtime.conf.ForceEagerActivationOption;
-import org.minerva.stateservice.models.BPMN;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import javax.sql.rowset.serial.SerialBlob;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +61,8 @@ public class ProcessFluentAPI extends TestCase {
                 .name("My process").packageName("org.jbpm")
                 // nodes
                 .startNode(1).name("Start").done()
-                .humanTaskNode(2).name("s1_a1_init").done()
+                .actionNode(2).name("Action").action("java", "System.out.println(\"Hello World\");").done()
+//                .humanTaskNode(2).name("s1_a1_init").done()
                 .endNode(3).name("End").done()
                 // connections
                 .connection(1,
@@ -74,19 +71,19 @@ public class ProcessFluentAPI extends TestCase {
                         3);
         RuleFlowProcess process = factory.validate().getProcess();
         Resource res = ResourceFactory.newByteArrayResource(XmlBPMNProcessDumper.INSTANCE.dump(process).getBytes());
-        res.setSourcePath("~/processFactory.bpmn2"); // source path or target path must be set to be added into kbase
-        EntityTransaction transaction = entityManager.getTransaction();
-        transaction.begin();
+        res.setSourcePath("~/processFactory.bpmn2");
+//        EntityTransaction transaction = entityManager.getTransaction();
+//        transaction.begin();
+//
+//        entityManager.persist(new BPMN(
+//                new SerialBlob(XmlBPMNProcessDumper.INSTANCE.dump(process).getBytes())
+//        ));
+//        transaction.commit();
 
-        entityManager.persist(new BPMN(
-                new SerialBlob(XmlBPMNProcessDumper.INSTANCE.dump(process).getBytes())
-        ));
-        transaction.commit();
-
-//        KieBase kbase = createKnowledgeBaseFromResources(res);
-//        StatefulKnowledgeSession ksession = createKnowledgeSession(kbase);
-//        ksession.startProcess("org.jbpm.process");
-//        ksession.dispose();
+        KieBase kbase = createKnowledgeBaseFromResources(res);
+        StatefulKnowledgeSession ksession = createKnowledgeSession(kbase);
+        ksession.startProcess("org.jbpm.process");
+        ksession.dispose();
     }
 
     protected KieBase createKnowledgeBaseFromResources(Resource... process)
